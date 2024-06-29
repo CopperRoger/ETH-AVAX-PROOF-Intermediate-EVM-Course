@@ -3,24 +3,29 @@
 // compiler version must be greater than or equal to 0.8.17 and less than 0.9.0
 pragma solidity ^0.8.25;
 
+// importing String.sol from openzeppelin library
+import "@openzeppelin/contracts/utils/Strings.sol";
+
 // write a smart contract that implements the require(), assert() and revert() statements.
 
 contract ErrorHandling {
-    uint public number=0;
+    uint public Pool=0;
+    uint public Target= 100;
 
-    function useRequire(uint _i) public{
-        require(_i<10,"input must be less than 10");
-        number+=_i;
-    }
-    function useRevert(uint _i) public{
-        number +=_i;
-        if(_i>=10){
-            revert("input must be less than 10");
+    function donate(uint _i)  public{
+        require(Pool<Target,"Target already achieved .");
+
+        Pool+=_i;
+
+        if(Pool>Target){
+            string memory message = "Donations should be less than or equal to ";
+            string memory num=Strings.toString(Target + _i - Pool);
+            revert(string.concat(message , num));
         }
+
+        assert(_i<50);
+
+
     }
 
-    function useAssert(uint _i) public{
-        number +=_i;
-        assert(number==20);
-    }
 }
