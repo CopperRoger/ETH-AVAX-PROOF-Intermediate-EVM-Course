@@ -9,21 +9,28 @@ Solidity compiler version: ^0.8.25
 
 ## Overview
 
-The contract includes three functions:
+The ErrorHandling smart contract allows users to donate to a pool. It includes error handling mechanisms to ensure that:
 
-useRequire(uint _i): Uses the require() statement.
+- Donations do not exceed a set target.
+- Individual donations are less than a specified amount.
 
-useRevert(uint _i): Uses the revert() statement.
 
-useAssert(uint _i): Uses the assert() statement.
+## Features
 
-Each function illustrates how to handle errors and ensure specific conditions are met within a smart contract.
+- Target Limit: Ensures the total pool does not exceed the target.
+- Individual Donation Limit: Ensures individual donations are less than a specified amount.
+- Error Handling: Implements require(), assert(), and revert() for robust error checking and handling.
 
 ## Getting Started
 
 ### Executing program
 
 To run this program, you can use Remix, an online Solidity IDE. To get started, go to the Remix website at https://remix.ethereum.org/.
+
+Install dependencies:
+Ensure you have the OpenZeppelin library installed:
+
+npm install @openzeppelin/contracts
 
 Once you are on the Remix website, create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension (e.g., ErrorHandling.sol). Copy and paste the following code into the file:
 
@@ -33,27 +40,28 @@ Once you are on the Remix website, create a new file by clicking on the "+" icon
 // compiler version must be greater than or equal to 0.8.17 and less than 0.9.0
 pragma solidity ^0.8.25;
 
-// write a smart contract that implements the require(), assert() and revert() statements.
+// Importing String.sol from OpenZeppelin library
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract ErrorHandling {
-    uint public number=0;
+    uint public Pool = 0;
+    uint public Target = 100;
 
-    function useRequire(uint _i) public{
-        require(_i<10,"input must be less than 10");
-        number+=_i;
-    }
-    function useRevert(uint _i) public{
-        number +=_i;
-        if(_i>=10){
-            revert("input must be less than 10");
+    function donate(uint _i) public {
+        require(Pool < Target, "Target already achieved.");
+
+        Pool += _i;
+
+        if (Pool > Target) {
+            string memory message = "Donations should be less than or equal to ";
+            string memory num = Strings.toString(Target + _i - Pool);
+            revert(string.concat(message, num));
         }
-    }
 
-    function useAssert(uint _i) public{
-        number +=_i;
-        assert(number==20);
+        assert(_i < 50);
     }
 }
+
 
 ```
 
@@ -63,28 +71,17 @@ Once the code is compiled, you can deploy the contract by clicking on the "Deplo
 
 Once the contract is deployed, you can interact with it by calling the sayHello function. Click on the "ErrorHandling" contract in the left-hand sidebar.
 
-## Explaination
+## Usage
 
-### useRequire Function
+### Contract Details
 
-The require() function is used to validate user inputs and conditions before executing the function logic.
+- Pool: Keeps track of the total donations.
+  
+- Target: The maximum donation limit (set to 100).
 
-If the condition (_i < 10) is not met, the transaction is reverted, and an error message "input must be less than 10" is returned.
+### Functions
 
-This is useful for checking external inputs and ensuring the contract functions as intended under valid conditions.
-
-### useRevert Function
-
-The revert() function is used to revert the transaction if certain conditions are not met.
-
-It can be used anywhere within the function logic to abort execution and revert the state changes.
-
-Here, if the input _i is greater than or equal to 10, the transaction is reverted with the error message "input must be less than 10".
-
-### useAssert Function
-
-The assert() function is used to check for internal errors and validate invariants.
-
-It should be used to catch situations that should never occur, as it consumes all remaining gas if the condition fails.
-
-In this example, after adding _i to number, the function asserts that number equals 20. If this condition fails, it indicates a serious bug or unexpected condition, and the transaction is reverted.
+- donate(uint _i): Allows users to donate to the pool.
+ - Uses require() to check if the target has already been achieved.
+ - Uses revert() to ensure donations do not exceed the target.
+ - Uses assert() to ensure individual donations are less than a specified amount.
